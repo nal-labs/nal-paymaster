@@ -36,8 +36,14 @@ func EncodePaymasterAndData(
 	concat = append(concat, validAfterBytes[:]...)
 	if data.PaymasterMode == 1 {
 		concat = append(concat, data.ERC20Token.Bytes()...)
-		concat = append(concat, data.PostOpGas.Bytes()...)
-		concat = append(concat, data.ExchangeRate.Bytes()...)
+		postOpGasBytes := [16]byte{}
+		ptOpGasLen := len(data.PostOpGas.Bytes())
+		copy(postOpGasBytes[16-ptOpGasLen:], data.PostOpGas.Bytes())
+		concat = append(concat, postOpGasBytes[:]...)
+		exchangeRateBytes := [32]byte{}
+		exRtLen := len(data.ExchangeRate.Bytes())
+		copy(exchangeRateBytes[32-exRtLen:], data.ExchangeRate.Bytes())
+		concat = append(concat, exchangeRateBytes[:]...)
 	}
 	concat = append(concat, signature...)
 	return concat, nil

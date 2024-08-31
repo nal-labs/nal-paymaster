@@ -82,7 +82,7 @@ func validateStruct(ctx any) error {
 
 type ContextType struct {
 	Type  string         `json:"type" mapstructure:"type" validate:"required"`
-	Token common.Address `json:"token" mapstructure:"token"`
+	Token common.Address `json:"token" mapstructure:"token" validate:"omitempty"`
 }
 
 func NewContextType(data map[string]any) (*ContextType, error) {

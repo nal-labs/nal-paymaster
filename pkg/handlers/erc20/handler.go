@@ -44,8 +44,9 @@ func (h *Handler) Run(
 	pm common.Address,
 	tokenAddr common.Address,
 ) (*handlers.SponsorUserOperationResponse, error) {
+	exRate := handlers.GetCoinRate()
 	// Get paymaster data.
-	data := contract.NewData(pm, tokenAddr, big.NewInt(0), 1, big.NewInt(30000))
+	data := contract.NewData(pm, tokenAddr, big.NewInt(exRate*1e6), 1, big.NewInt(30000))
 
 	// Estimate gas values to account for paymasterAndData.
 	pmOp, err := h.gasEstimator.OverrideOpGasLimitsForPND(op, ep, data)
