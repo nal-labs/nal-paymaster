@@ -1,4 +1,4 @@
-package payg
+package erc20
 
 import (
 	"fmt"
@@ -42,9 +42,10 @@ func (h *Handler) Run(
 	op *userop.UserOperation,
 	ep common.Address,
 	pm common.Address,
+	tokenAddr common.Address,
 ) (*handlers.SponsorUserOperationResponse, error) {
 	// Get paymaster data.
-	data := contract.NewData(pm, common.HexToAddress("0x"), big.NewInt(0), 0, big.NewInt(0))
+	data := contract.NewData(pm, tokenAddr, big.NewInt(0), 1, big.NewInt(30000))
 
 	// Estimate gas values to account for paymasterAndData.
 	pmOp, err := h.gasEstimator.OverrideOpGasLimitsForPND(op, ep, data)

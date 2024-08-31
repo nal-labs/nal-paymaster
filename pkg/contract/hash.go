@@ -13,15 +13,13 @@ func GetHash(
 ) ([32]byte, error) {
 	pm, err := NewContract(data.Paymaster, eth)
 	if err != nil {
+		println("GetHash-NewContract", err.Error())
 		return [32]byte{}, err
 	}
 
 	return pm.GetHash(
 		&bind.CallOpts{},
+		data.PaymasterMode,
 		UserOperation(*op),
-		data.ValidUntil,
-		data.ValidAfter,
-		data.ERC20Token,
-		data.ExchangeRate,
 	)
 }

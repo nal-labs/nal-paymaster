@@ -13,17 +13,19 @@ import (
 	"github.com/stackup-wallet/stackup-bundler/pkg/signer"
 	"github.com/stackup-wallet/stackup-bundler/pkg/userop"
 	"github.com/stackup-wallet/stackup-paymaster/pkg/handlers"
+	"github.com/stackup-wallet/stackup-paymaster/pkg/handlers/erc20"
 	"github.com/stackup-wallet/stackup-paymaster/pkg/handlers/payg"
 )
 
 type Client struct {
-	rpc         *rpc.Client
-	eth         *ethclient.Client
-	chainID     *big.Int
-	ov          *gas.Overhead
-	ep2pms      map[common.Address][]common.Address
-	paygHandler *payg.Handler
-	logger      logr.Logger
+	rpc          *rpc.Client
+	eth          *ethclient.Client
+	chainID      *big.Int
+	ov           *gas.Overhead
+	ep2pms       map[common.Address][]common.Address
+	paygHandler  *payg.Handler
+	erc20Handler *erc20.Handler
+	logger       logr.Logger
 }
 
 func New(
@@ -36,13 +38,14 @@ func New(
 	l logr.Logger,
 ) *Client {
 	return &Client{
-		rpc:         rpc,
-		eth:         eth,
-		chainID:     chain,
-		ov:          ov,
-		ep2pms:      ep2pms,
-		paygHandler: payg.New(signer, rpc, eth, chain, ov),
-		logger:      l,
+		rpc:          rpc,
+		eth:          eth,
+		chainID:      chain,
+		ov:           ov,
+		ep2pms:       ep2pms,
+		paygHandler:  payg.New(signer, rpc, eth, chain, ov),
+		erc20Handler: erc20.New(signer, rpc, eth, chain, ov),
+		logger:       l,
 	}
 }
 
@@ -100,11 +103,22 @@ func (c *Client) SponsorUserOperation(
 		l.Error(err, "pm_sponsorUserOperation error")
 		return nil, err
 	}
+	l.Info(ct.Type, "Context type")
 	l = l.WithValues("type", ct.Type)
 
 	switch ct.Type {
 	case "payg":
 		res, err := c.paygHandler.Run(userOp, epAddr, pmAddrs[0])
+		if err != nil {
+			l.Error(err, "pm_sponsorUserOperation error")
+			return nil, err
+		}
+
+		l.Info("pm_sponsorUserOperation ok")
+		return res, nil
+	case "erc20":
+		l.Info(ct.Token.String(), "Context token")
+		res, err := c.erc20Handler.Run(userOp, epAddr, pmAddrs[0], ct.Token)
 		if err != nil {
 			l.Error(err, "pm_sponsorUserOperation error")
 			return nil, err
