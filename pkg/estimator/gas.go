@@ -1,6 +1,7 @@
 package estimator
 
 import (
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -45,7 +46,9 @@ func updateOpPreVerificationGas(
 		return nil, err
 	}
 
-	opData["preVerificationGas"] = common.BigToHash(pvg).String()
+	newPVG := new(big.Int)
+	newPVG.Add(pvg, big.NewInt(100))
+	opData["preVerificationGas"] = common.BigToHash(newPVG).String()
 	return userop.New(opData)
 }
 
@@ -91,20 +94,32 @@ func (g *GasEstimator) OverrideOpGasLimitsForPND(
 	data *contract.Data,
 ) (*userop.UserOperation, error) {
 	// Generate a PND for EstimateGas.
+	pndWithoutSig, err := contract.EncodePaymasterAndData(data, []byte{})
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("%x\n", pndWithoutSig)
+	op.PaymasterAndData = pndWithoutSig
 	hash, err := contract.GetHash(g.eth, op, data)
 	if err != nil {
+		println("OverrideOpGasLimitsForPND-GetHash", err.Error())
 		return nil, err
 	}
 	sig, err := contract.Sign(hash[:], g.signer)
 	if err != nil {
+		println("OverrideOpGasLimitsForPND-Sign", err.Error())
 		return nil, err
 	}
 	pnd, err := contract.EncodePaymasterAndData(data, sig)
+	fmt.Printf("%x\n", pnd)
 	if err != nil {
+		println("OverrideOpGasLimitsForPND-EncodePaymasterAndData", err.Error())
 		return nil, err
 	}
+	println("OverrideOpGasLimitsForPND-EncodePaymasterAndData", pnd)
 	pmOp, err := updateOpPaymasterAndData(op, hexutil.Encode(pnd))
 	if err != nil {
+		println("OverrideOpGasLimitsForPND-updateOpPaymasterAndData", err.Error())
 		return nil, err
 	}
 
@@ -116,27 +131,32 @@ func (g *GasEstimator) OverrideOpGasLimitsForPND(
 		Ov:          g.ov,
 		ChainID:     g.chainID,
 		MaxGasLimit: maxGasLimit,
-		Tracer:      "bundlerExecutorTracer",
+		Tracer:      "",
 	})
 	if err != nil {
+		println("OverrideOpGasLimitsForPND-EstimateGas", err.Error())
 		return nil, err
 	}
 
 	// Update gas fields.
-	pmOp, err = updateOpPaymasterAndData(pmOp, DummyPaymasterAndDataHex)
+	// pmOp, err = updateOpPaymasterAndData(pmOp, DummyPaymasterAndDataHex)
 	if err != nil {
+		println("OverrideOpGasLimitsForPND-updateOpPaymasterAndData", err.Error())
 		return nil, err
 	}
 	pmOp, err = updateOpVerificationGasLimit(pmOp, big.NewInt(int64(vgl)))
 	if err != nil {
+		println("OverrideOpGasLimitsForPND-updateOpVerificationGasLimit", err.Error())
 		return nil, err
 	}
 	pmOp, err = updateOpCallGasLimit(pmOp, big.NewInt(int64(cgl)))
 	if err != nil {
+		println("OverrideOpGasLimitsForPND-updateOpCallGasLimit", err.Error())
 		return nil, err
 	}
 	pmOp, err = updateOpPreVerificationGas(pmOp, g.ov)
 	if err != nil {
+		println("OverrideOpGasLimitsForPND-updateOpPreVerificationGas", err.Error())
 		return nil, err
 	}
 
