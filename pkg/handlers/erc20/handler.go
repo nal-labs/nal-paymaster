@@ -58,9 +58,6 @@ func (h *Handler) Run(
 	// Fetch hash.
 	hash, err := contract.GetHash(h.eth, pmOp, data)
 	fmt.Println("GetHash", *pmOp)
-	for _, b := range hash {
-		println(b) // 分别输出: 65, 66, 67, 68, 69
-	}
 	if err != nil {
 		println("GetHash", err.Error())
 		return nil, err

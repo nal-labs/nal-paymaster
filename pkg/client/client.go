@@ -103,8 +103,9 @@ func (c *Client) SponsorUserOperation(
 		l.Error(err, "pm_sponsorUserOperation error")
 		return nil, err
 	}
-	l.Info(ct.Type, "Context type")
+
 	l = l.WithValues("type", ct.Type)
+	l.Info("Begin to handle pm_sponsorUserOperation")
 
 	switch ct.Type {
 	case "payg":
@@ -117,7 +118,7 @@ func (c *Client) SponsorUserOperation(
 		l.Info("pm_sponsorUserOperation ok")
 		return res, nil
 	case "erc20":
-		l.Info(ct.Token.String(), "Context token")
+		l.Info("", "ERC20 Token Addr", ct.Token.String())
 		res, err := c.erc20Handler.Run(userOp, epAddr, pmAddrs[0], ct.Token)
 		if err != nil {
 			l.Error(err, "pm_sponsorUserOperation error")
