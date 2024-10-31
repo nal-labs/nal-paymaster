@@ -45,7 +45,10 @@ func updateOpPreVerificationGas(
 		return nil, err
 	}
 
-	opData["preVerificationGas"] = common.BigToHash(pvg).String()
+	newPVG := new(big.Int)
+	newPVG.Add(pvg, big.NewInt(100))
+	opData["preVerificationGas"] = common.BigToHash(newPVG).String()
+	// opData["preVerificationGas"] = common.BigToHash(pvg).String()
 	return userop.New(opData)
 }
 
@@ -116,14 +119,14 @@ func (g *GasEstimator) OverrideOpGasLimitsForPND(
 		Ov:          g.ov,
 		ChainID:     g.chainID,
 		MaxGasLimit: maxGasLimit,
-		Tracer:      "bundlerExecutorTracer",
+		Tracer:      "",
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	// Update gas fields.
-	pmOp, err = updateOpPaymasterAndData(pmOp, DummyPaymasterAndDataHex)
+	// pmOp, err = updateOpPaymasterAndData(pmOp, DummyPaymasterAndDataHex)
 	if err != nil {
 		return nil, err
 	}

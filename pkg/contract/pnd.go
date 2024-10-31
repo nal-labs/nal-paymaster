@@ -8,8 +8,8 @@ func getAbiArgs() abi.Arguments {
 	return abi.Arguments{
 		{Name: "validUntil", Type: uint48},
 		{Name: "validAfter", Type: uint48},
-		{Name: "erc20Token", Type: address},
-		{Name: "exchangeRate", Type: uint256},
+		// {Name: "erc20Token", Type: address},
+		// {Name: "exchangeRate", Type: uint256},
 	}
 }
 
@@ -18,7 +18,9 @@ func EncodePaymasterAndData(
 	signature []byte,
 ) ([]byte, error) {
 	args := getAbiArgs()
-	packed, err := args.Pack(data.ValidUntil, data.ValidAfter, data.ERC20Token, data.ExchangeRate)
+	// packed, err := args.Pack(data.ValidUntil, data.ValidAfter, data.ERC20Token, data.ExchangeRate)
+	packed, err := args.Pack(data.ValidUntil, data.ValidAfter)
+
 	if err != nil {
 		return nil, err
 	}

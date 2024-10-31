@@ -21,7 +21,5 @@ func GetHash(
 		UserOperation(*op),
 		data.ValidUntil,
 		data.ValidAfter,
-		data.ERC20Token,
-		data.ExchangeRate,
 	)
 }
