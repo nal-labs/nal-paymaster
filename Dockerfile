@@ -13,7 +13,7 @@ RUN go mod download
 COPY . ./
 
 # Build the binary.
-RUN go build -v -o stackup-paymaster
+RUN go build -v -o nal-paymaster
 
 # Use the official Debian slim image for a lean production container.
 # https://hub.docker.com/_/debian
@@ -24,8 +24,8 @@ RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -
     rm -rf /var/lib/apt/lists/*
 
 # Copy the binary to the production image from the builder stage.
-COPY --from=builder /app/stackup-paymaster /app/stackup-paymaster
+COPY --from=builder /app/nal-paymaster /app/nal-paymaster
 
 EXPOSE 43371
 
-CMD ["/app/stackup-paymaster", "start"]
+CMD ["/app/nal-paymaster", "start"]
