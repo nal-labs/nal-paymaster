@@ -23,7 +23,7 @@ import (
 func Server() {
 	conf := config.GetValues()
 
-	logr := logger.NewZeroLogr().WithName("stackup_paymaster")
+	logr := logger.NewZeroLogr().WithName("nal_paymaster")
 
 	signer, err := signer.New(conf.SigningKey)
 	if err != nil {
